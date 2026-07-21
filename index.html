@@ -645,7 +645,16 @@
   <script>
     const CONFIG = {
       whatsappNumber: "5492346636360",
-      appsScriptUrl: ""
+      googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdCEowOlyqFDiaugl68Qd7P59v6v_1lRWHdJxQJrfF39xYjLA/formResponse",
+      googleFormFields: {
+        name: "entry.2005620554",
+        phone: "entry.892132621",
+        situation: "entry.1065046570",
+        propertyType: "entry.1166974658",
+        goal: "entry.86430257",
+        timing: "entry.1077059376",
+        profile: "entry.1731181553"
+      }
     };
 
     const questions = [
@@ -815,19 +824,31 @@
     }
 
     async function saveLead(payload) {
-      if (!CONFIG.appsScriptUrl) {
-        console.info("Modo demostración: configurá appsScriptUrl para guardar en Google Sheets.", payload);
-        return { demo: true };
-      }
+      const fields = CONFIG.googleFormFields;
+      const body = new URLSearchParams();
 
-      const response = await fetch(CONFIG.appsScriptUrl, {
+      body.append(fields.name, payload.name);
+      body.append(fields.phone, payload.phone);
+      body.append(fields.situation, payload.situation);
+      body.append(fields.propertyType, payload.propertyType);
+      body.append(fields.goal, payload.goal);
+      body.append(fields.timing, payload.timing);
+      body.append(fields.profile, payload.profile);
+
+      body.append("fvv", "1");
+      body.append("pageHistory", "0");
+
+      await fetch(CONFIG.googleFormUrl, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: body.toString(),
+        keepalive: true
       });
 
-      return response;
+      return { ok: true };
     }
 
     document.getElementById("startBtn").addEventListener("click", () => {
@@ -865,6 +886,9 @@
 
     document.getElementById("contactForm").addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      const submitButton = event.submitter;
+      const originalButtonText = submitButton ? submitButton.textContent : "";
 
       const name = document.getElementById("nameInput").value.trim();
       const phone = document.getElementById("phoneInput").value.trim();
@@ -909,9 +933,25 @@
       };
 
       try {
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = "Guardando...";
+        }
+
         await saveLead(payload);
+
+        // Pequeña espera para asegurar que Google Forms reciba el envío.
+        await new Promise(resolve => setTimeout(resolve, 1200));
       } catch (error) {
         console.error("No se pudieron guardar los datos:", error);
+        errorBox.textContent = "No pudimos guardar los datos. Revisá la conexión e intentá nuevamente.";
+        errorBox.classList.add("show");
+
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
+        }
+        return;
       }
 
       document.getElementById("resultIcon").textContent = profile.icon;
