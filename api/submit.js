@@ -11,9 +11,10 @@ const FIELDS = {
   profile: "entry.1731181553"
 };
 
-export default async function handler(request, response) {
+module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
+
     return response.status(405).json({
       ok: false,
       message: "Método no permitido."
@@ -43,11 +44,12 @@ export default async function handler(request, response) {
     if (missing.length > 0) {
       return response.status(400).json({
         ok: false,
-        message: `Faltan datos obligatorios: ${missing.join(", ")}`
+        message: "Faltan datos obligatorios: " + missing.join(", ")
       });
     }
 
     const formBody = new URLSearchParams();
+
     formBody.append(FIELDS.name, String(payload.name));
     formBody.append(FIELDS.phone, String(payload.phone));
     formBody.append(FIELDS.situation, String(payload.situation));
@@ -68,9 +70,11 @@ export default async function handler(request, response) {
     });
 
     if (!googleResponse.ok) {
-      throw new Error(
-        `Google Forms respondió con estado ${googleResponse.status}.`
-      );
+      return response.status(502).json({
+        ok: false,
+        message:
+          "Google Forms respondió con estado " + googleResponse.status
+      });
     }
 
     return response.status(200).json({
@@ -82,9 +86,10 @@ export default async function handler(request, response) {
 
     return response.status(500).json({
       ok: false,
-      message: error instanceof Error
-        ? error.message
-        : "No se pudieron guardar los datos."
+      message:
+        error && error.message
+          ? error.message
+          : "No se pudieron guardar los datos."
     });
   }
-}
+};
