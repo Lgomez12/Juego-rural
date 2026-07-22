@@ -721,6 +721,50 @@
       }
     }
 
+  
+    .final-message {
+      margin-top: 22px;
+      padding: 22px 20px;
+      border-radius: 22px;
+      background: linear-gradient(
+        135deg,
+        rgba(104, 53, 140, 0.08),
+        rgba(68, 173, 70, 0.08)
+      );
+      border: 1px solid rgba(104, 53, 140, 0.14);
+      text-align: center;
+      color: #263238;
+      line-height: 1.55;
+    }
+
+    .final-message p {
+      margin: 0;
+    }
+
+    .final-message p + p {
+      margin-top: 10px;
+    }
+
+    .final-thanks {
+      color: #68358C;
+      font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+      font-weight: 800;
+    }
+
+    .final-tagline {
+      color: #68358C;
+      font-weight: 800;
+      font-size: clamp(1rem, 2.2vw, 1.18rem);
+    }
+
+    @media (max-width: 420px) {
+      .final-message {
+        margin-top: 18px;
+        padding: 18px 16px;
+        border-radius: 18px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -887,6 +931,15 @@
         <button class="btn btn-secondary" id="restartBtn" style="margin-top:16px;">
           Volver a jugar
         </button>
+
+        <div class="final-message">
+          <p class="final-thanks">Gracias por participar.</p>
+          <p>
+            En <strong>Leticia Gómez Propiedades</strong> trabajamos tu propiedad
+            con seriedad, compromiso y una atención cercana.
+          </p>
+          <p class="final-tagline">Hacemos simple lo importante.</p>
+        </div>
       </section>
     </section>
   </main>
