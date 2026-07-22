@@ -527,6 +527,55 @@
         transition: none !important;
       }
     }
+
+
+    .challenge-copy {
+      margin: 18px 0;
+      padding: 18px;
+      border: 1px solid rgba(104, 53, 140, 0.18);
+      border-radius: 18px;
+      background: rgba(104, 53, 140, 0.06);
+      text-align: center;
+    }
+
+    .challenge-copy strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--purple, #68358C);
+      font-size: 1.08rem;
+    }
+
+    .answer-feedback {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(68, 173, 70, 0.10);
+      line-height: 1.55;
+    }
+
+    .answer-feedback.show { display: block; }
+
+    .contact-choice {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .contact-card {
+      padding: 16px;
+      border: 1px solid rgba(104, 53, 140, 0.16);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .contact-card p { margin: 0 0 10px; }
+
+    .btn.legal-whatsapp {
+      background: #68358C;
+      color: #fff;
+    }
+
   </style>
 </head>
 <body>
@@ -616,21 +665,59 @@
         </form>
       </section>
 
+      <section class="screen" data-screen="challengeIntro">
+        <div class="eyebrow">Todavía no terminamos…</div>
+        <h2>¿Cuánto sabés sobre propiedades heredadas?</h2>
+        <div class="challenge-copy">
+          <strong>Dos preguntas sobre situaciones muy comunes.</strong>
+          Antes de mostrarte tu resultado final, te proponemos un desafío rápido.
+          ¿Te animás?
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="challengeBackBtn">Atrás</button>
+          <button class="btn btn-primary" id="challengeStartBtn">Sí, quiero jugar</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="successionQuestion">
+        <div class="question-number" id="successionQuestionNumber"></div>
+        <h2 id="successionQuestionTitle"></h2>
+        <div class="options" id="successionOptionsList"></div>
+        <div class="answer-feedback" id="successionFeedback"></div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="successionBackBtn">Atrás</button>
+          <button class="btn btn-primary" id="successionNextBtn" disabled>Continuar</button>
+        </div>
+      </section>
+
       <section class="screen" data-screen="result">
         <div class="result-icon" id="resultIcon" aria-hidden="true">🏡</div>
         <div class="eyebrow">Tu perfil es</div>
         <h2 id="resultTitle"></h2>
         <div class="result-box" id="resultText"></div>
 
-        <p class="lead" style="margin-top:22px;">¿Querés conversar sobre tu propiedad o búsqueda?</p>
-
-        <div class="actions">
-          <a class="btn whatsapp" id="whatsappBtn" target="_blank" rel="noopener noreferrer">
-            Consultar por WhatsApp
-          </a>
+        <div class="challenge-copy" style="margin-top:20px;">
+          <strong id="successionResultTitle"></strong>
+          <span id="successionResultText"></span>
         </div>
 
-        <button class="btn btn-secondary" id="restartBtn" style="margin-top:12px;">
+        <div class="contact-choice">
+          <div class="contact-card">
+            <p><strong>¿Tu consulta es sobre una propiedad?</strong></p>
+            <a class="btn whatsapp" id="whatsappBtn" target="_blank" rel="noopener noreferrer">
+              Hablar con Leticia
+            </a>
+          </div>
+
+          <div class="contact-card">
+            <p><strong>¿Tu consulta está relacionada con una sucesión?</strong></p>
+            <a class="btn legal-whatsapp" id="juanWhatsappBtn" target="_blank" rel="noopener noreferrer">
+              Hablar con Juan
+            </a>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" id="restartBtn" style="margin-top:16px;">
           Volver a jugar
         </button>
 
@@ -644,51 +731,9 @@
 
   <script>
     const CONFIG = {
-      whatsappNumber: "5492346636360"
+      leticiaWhatsappNumber: "5492346636360",
+      juanWhatsappNumber: "5492346455732"
     };
-
-    const questions = [
-      {
-        id: "situation",
-        title: "¿Cuál de estas opciones te representa mejor?",
-        options: [
-          "Tengo una propiedad",
-          "Estoy buscando una propiedad",
-          "Solo quiero conocer mi perfil"
-        ]
-      },
-      {
-        id: "propertyType",
-        title: "¿Qué tipo de propiedad te interesa?",
-        options: [
-          "Casa o departamento",
-          "Terreno",
-          "Quinta o campo",
-          "Local comercial"
-        ]
-      },
-      {
-        id: "goal",
-        title: "¿Qué te gustaría hacer?",
-        options: [
-          "Vender",
-          "Alquilar",
-          "Comprar",
-          "Conocer el valor de una propiedad",
-          "Todavía no lo tengo decidido"
-        ]
-      },
-      {
-        id: "timing",
-        title: "¿Cuándo pensás avanzar?",
-        options: [
-          "Lo antes posible",
-          "En los próximos meses",
-          "Más adelante",
-          "Solo estoy averiguando"
-        ]
-      }
-    ];
 
     const profiles = {
       "Propietario decidido": {
@@ -699,22 +744,49 @@
         icon: "🗓️",
         text: "Te gusta organizarte antes de tomar una decisión. Conocer el valor actual de tu propiedad y revisar la documentación puede ayudarte a prepararte con tiempo."
       },
-      "Explorador inmobiliario": {
-        icon: "🧭",
-        text: "Estás en una etapa de búsqueda y comparación. Definir prioridades, presupuesto y zona puede ayudarte a encontrar una propiedad que realmente se adapte a vos."
-      },
-      "Inversor con visión": {
-        icon: "📈",
-        text: "Buscás oportunidades con potencial y pensás más allá de lo inmediato. Analizar ubicación, uso y proyección es clave antes de tomar una decisión."
-      },
       "Propietario curioso": {
         icon: "💡",
-        text: "Querés entender mejor el valor de una propiedad antes de tomar una decisión. Una tasación profesional puede darte información concreta para evaluar tus opciones."
+        text: "Querés entender mejor el valor de tu propiedad antes de tomar una decisión. Una tasación profesional puede darte información concreta para evaluar tus opciones."
+      },
+      "Buscador comprador": {
+        icon: "🏡",
+        text: "Estás buscando una propiedad para comprar. Definir prioridades, presupuesto y zona puede ayudarte a encontrar una opción que realmente se adapte a vos."
+      },
+      "Buscador de alquiler": {
+        icon: "🔎",
+        text: "Estás buscando una propiedad para alquilar. Tener claras tus necesidades y el momento en que querés mudarte puede hacer la búsqueda más simple."
+      },
+      "Persona en transición": {
+        icon: "🔄",
+        text: "Tenés una propiedad y, al mismo tiempo, estás pensando en tu próximo paso. Ordenar prioridades permite coordinar mejor una venta, un alquiler o una nueva búsqueda."
+      },
+      "Explorador inmobiliario": {
+        icon: "🧭",
+        text: "Estás conociendo posibilidades y reuniendo información. Explorar el mercado con tiempo puede ayudarte a tomar una decisión más segura cuando llegue el momento."
       }
     };
 
+    const successionQuestions = [
+      {
+        title: "Si una propiedad pertenece a varios herederos, ¿alcanza con que uno solo quiera venderla?",
+        options: ["Verdadero", "Falso"],
+        correct: "Falso",
+        explanation: "Para vender la propiedad completa deben participar quienes tengan derechos sobre ella y cumplirse los pasos legales correspondientes."
+      },
+      {
+        title: "Si todos los herederos están de acuerdo en vender, ¿igual es necesario hacer la sucesión?",
+        options: ["Verdadero", "Falso"],
+        correct: "Verdadero",
+        explanation: "El acuerdo entre los herederos es importante, pero no reemplaza el trámite legal necesario para poder avanzar correctamente con la propiedad."
+      }
+    ];
+
     let currentQuestion = 0;
+    let currentSuccessionQuestion = 0;
+    let savedProfileName = "";
+    let savedName = "";
     const answers = {};
+    const successionAnswers = {};
 
     const screens = [...document.querySelectorAll(".screen")];
     const progressWrap = document.getElementById("progressWrap");
@@ -726,27 +798,124 @@
     const optionsList = document.getElementById("optionsList");
     const nextBtn = document.getElementById("nextBtn");
 
-    function showScreen(name) {
-      screens.forEach(screen => {
-        screen.classList.toggle("active", screen.dataset.screen === name);
+    function getQuestions() {
+      const situation = answers.situation;
+      const questions = [
+        {
+          id: "situation",
+          title: "¿Cuál de estas opciones te representa mejor?",
+          options: [
+            "Tengo una propiedad",
+            "Estoy buscando una propiedad",
+            "Tengo una propiedad y también estoy buscando",
+            "Solo quiero participar del juego"
+          ]
+        }
+      ];
+
+      if (situation === "Tengo una propiedad") {
+        questions.push(
+          {
+            id: "propertyType",
+            title: "¿Qué tipo de propiedad tenés?",
+            options: ["Casa o departamento", "Terreno", "Quinta o campo", "Local comercial"]
+          },
+          {
+            id: "goal",
+            title: "¿Qué te gustaría hacer con esa propiedad?",
+            options: ["Venderla", "Ponerla en alquiler", "Conocer su valor", "Todavía no lo decidí"]
+          }
+        );
+      } else if (situation === "Estoy buscando una propiedad") {
+        questions.push(
+          {
+            id: "propertyType",
+            title: "¿Qué tipo de propiedad estás buscando?",
+            options: ["Casa o departamento", "Terreno", "Quinta o campo", "Local comercial"]
+          },
+          {
+            id: "goal",
+            title: "¿Qué operación te interesa?",
+            options: ["Comprar", "Alquilar", "Todavía estoy evaluando"]
+          }
+        );
+      } else if (situation === "Tengo una propiedad y también estoy buscando") {
+        questions.push(
+          {
+            id: "goal",
+            title: "¿Qué necesitás resolver primero?",
+            options: [
+              "Vender una propiedad",
+              "Alquilar una propiedad que tengo",
+              "Comprar otra propiedad",
+              "Buscar un alquiler",
+              "Conocer el valor de mi propiedad"
+            ]
+          },
+          {
+            id: "propertyType",
+            title: "¿Qué tipo de propiedad está relacionada con tu prioridad?",
+            options: ["Casa o departamento", "Terreno", "Quinta o campo", "Local comercial"]
+          }
+        );
+      } else if (situation === "Solo quiero participar del juego") {
+        questions.push(
+          {
+            id: "goal",
+            title: "¿Qué tema te genera más curiosidad?",
+            options: ["Comprar", "Vender", "Alquilar", "Tasaciones", "Sucesiones"]
+          },
+          {
+            id: "propertyType",
+            title: "¿Qué tipo de propiedad te interesa más?",
+            options: ["Casa o departamento", "Terreno", "Quinta o campo", "Local comercial"]
+          }
+        );
+      } else {
+        questions.push(
+          { id: "propertyType", title: "¿Qué tipo de propiedad te interesa?", options: [] },
+          { id: "goal", title: "¿Qué te gustaría hacer?", options: [] }
+        );
+      }
+
+      questions.push({
+        id: "timing",
+        title: situation === "Estoy buscando una propiedad"
+          ? "¿Cuándo te gustaría encontrarla?"
+          : "¿Cuándo te gustaría avanzar?",
+        options: ["Lo antes posible", "En los próximos meses", "Más adelante", "Por ahora solo estoy averiguando"]
       });
+
+      return questions;
+    }
+
+    function showScreen(name) {
+      screens.forEach(screen => screen.classList.toggle("active", screen.dataset.screen === name));
       progressWrap.hidden = !["question", "contact"].includes(name);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function updateProgress(step) {
-      const totalSteps = questions.length + 1;
+      const totalSteps = 5;
       const percent = Math.round((step / totalSteps) * 100);
       progressBar.style.width = `${percent}%`;
-      progressText.textContent = step <= questions.length
-        ? `Pregunta ${step} de ${questions.length}`
-        : "Datos de contacto";
+      progressText.textContent = step <= 4 ? `Pregunta ${step} de 4` : "Datos de contacto";
       progressPercent.textContent = `${percent}%`;
     }
 
+    function clearDependentAnswers(changedId) {
+      if (changedId === "situation") {
+        delete answers.propertyType;
+        delete answers.goal;
+        delete answers.timing;
+      }
+      if (["propertyType", "goal"].includes(changedId)) delete answers.timing;
+    }
+
     function renderQuestion() {
+      const questions = getQuestions();
       const q = questions[currentQuestion];
-      questionNumber.textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+      questionNumber.textContent = `Pregunta ${currentQuestion + 1} de 4`;
       questionTitle.textContent = q.title;
       optionsList.innerHTML = "";
 
@@ -763,8 +932,9 @@
         }
 
         button.addEventListener("click", () => {
+          if (answers[q.id] !== optionText) clearDependentAnswers(q.id);
           answers[q.id] = optionText;
-          [...optionsList.children].forEach(item => {
+          [...optionsList.querySelectorAll(".option")].forEach(item => {
             item.classList.remove("selected");
             item.setAttribute("aria-pressed", "false");
           });
@@ -778,103 +948,144 @@
 
       nextBtn.disabled = !answers[q.id];
       updateProgress(currentQuestion + 1);
+      showScreen("question");
     }
 
     function calculateProfile() {
-      const { situation, propertyType, goal, timing } = answers;
-      const investmentTypes = ["Terreno", "Quinta o campo", "Local comercial"];
+      const { situation, goal, timing } = answers;
 
-      if (investmentTypes.includes(propertyType)) {
-        return "Inversor con visión";
-      }
+      if (situation === "Tengo una propiedad y también estoy buscando") return "Persona en transición";
+      if (situation === "Solo quiero participar del juego") return "Explorador inmobiliario";
 
-      if (
-        situation === "Tengo una propiedad" &&
-        ["Vender", "Alquilar"].includes(goal) &&
-        timing === "Lo antes posible"
-      ) {
-        return "Propietario decidido";
-      }
-
-      if (
-        situation === "Tengo una propiedad" &&
-        ["En los próximos meses", "Más adelante"].includes(timing)
-      ) {
+      if (situation === "Tengo una propiedad") {
+        if (goal === "Conocer su valor" || goal === "Todavía no lo decidí") return "Propietario curioso";
+        if (["Venderla", "Ponerla en alquiler"].includes(goal) && timing === "Lo antes posible") return "Propietario decidido";
         return "Propietario planificador";
       }
 
-      if (
-        situation === "Estoy buscando una propiedad" ||
-        goal === "Comprar"
-      ) {
-        return "Explorador inmobiliario";
+      if (situation === "Estoy buscando una propiedad") {
+        if (goal === "Comprar") return "Buscador comprador";
+        if (goal === "Alquilar") return "Buscador de alquiler";
       }
 
-      return "Propietario curioso";
+      return "Explorador inmobiliario";
     }
 
     async function saveLead(payload) {
       const response = await fetch("/api/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
       const result = await response.json();
-
-      if (!response.ok || !result.ok) {
-        throw new Error(result.message || "No se pudieron guardar los datos.");
-      }
-
+      if (!response.ok || !result.ok) throw new Error(result.message || "No se pudieron guardar los datos.");
       return result;
+    }
+
+    function renderSuccessionQuestion() {
+      const q = successionQuestions[currentSuccessionQuestion];
+      const number = document.getElementById("successionQuestionNumber");
+      const title = document.getElementById("successionQuestionTitle");
+      const list = document.getElementById("successionOptionsList");
+      const feedback = document.getElementById("successionFeedback");
+      const next = document.getElementById("successionNextBtn");
+
+      number.textContent = `Pregunta ${currentSuccessionQuestion + 1} de ${successionQuestions.length}`;
+      title.textContent = q.title;
+      list.innerHTML = "";
+      feedback.classList.remove("show");
+      feedback.innerHTML = "";
+
+      q.options.forEach(optionText => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option";
+        button.innerHTML = `<span class="option-dot" aria-hidden="true"></span><span>${optionText}</span>`;
+
+        if (successionAnswers[currentSuccessionQuestion] === optionText) button.classList.add("selected");
+
+        button.addEventListener("click", () => {
+          successionAnswers[currentSuccessionQuestion] = optionText;
+          [...list.querySelectorAll(".option")].forEach(item => item.classList.remove("selected"));
+          button.classList.add("selected");
+          const correct = optionText === q.correct;
+          feedback.innerHTML = `<strong>${correct ? "¡Correcto!" : `La respuesta correcta es ${q.correct}.`}</strong><br>${q.explanation}`;
+          feedback.classList.add("show");
+          next.disabled = false;
+        });
+        list.appendChild(button);
+      });
+
+      next.textContent = currentSuccessionQuestion === successionQuestions.length - 1 ? "Ver resultado final" : "Continuar";
+      next.disabled = !successionAnswers[currentSuccessionQuestion];
+      showScreen("successionQuestion");
+    }
+
+    function showFinalResult() {
+      const profile = profiles[savedProfileName];
+      const score = successionQuestions.reduce((total, question, index) =>
+        total + (successionAnswers[index] === question.correct ? 1 : 0), 0);
+
+      const challengeResults = {
+        2: {
+          title: "2 respuestas correctas · ¡Tenés claros los primeros pasos!",
+          text: "Sabés que para vender una propiedad heredada no alcanza solamente con ponerse de acuerdo: también es necesario revisar la documentación y cumplir con el proceso legal."
+        },
+        1: {
+          title: "1 respuesta correcta · ¡Vas por buen camino!",
+          text: "Conocés algunos puntos importantes, aunque en las sucesiones suelen aparecer dudas que conviene resolver antes de publicar o negociar una propiedad."
+        },
+        0: {
+          title: "0 respuestas correctas · Hay algunos mitos por aclarar",
+          text: "Es muy común tener dudas sobre las propiedades heredadas. Informarse y consultar antes de avanzar puede ayudar a evitar demoras y complicaciones."
+        }
+      };
+
+      document.getElementById("resultIcon").textContent = profile.icon;
+      document.getElementById("resultTitle").textContent = savedProfileName;
+      document.getElementById("resultText").textContent = profile.text;
+      document.getElementById("successionResultTitle").textContent = challengeResults[score].title;
+      document.getElementById("successionResultText").textContent = challengeResults[score].text;
+
+      const leticiaMessage = `Hola Leticia, participé del juego de la Expo Rural y mi perfil fue "${savedProfileName}". Soy ${savedName} y quiero hacer una consulta.`;
+      const juanMessage = `Hola, Juan. Participé del juego en la Exposición Rural y quisiera hacerte una consulta sobre una propiedad en sucesión.`;
+      document.getElementById("whatsappBtn").href = `https://wa.me/${CONFIG.leticiaWhatsappNumber}?text=${encodeURIComponent(leticiaMessage)}`;
+      document.getElementById("juanWhatsappBtn").href = `https://wa.me/${CONFIG.juanWhatsappNumber}?text=${encodeURIComponent(juanMessage)}`;
+
+      progressWrap.hidden = true;
+      showScreen("result");
     }
 
     document.getElementById("startBtn").addEventListener("click", () => {
       currentQuestion = 0;
       renderQuestion();
-      showScreen("question");
     });
 
     document.getElementById("backBtn").addEventListener("click", () => {
-      if (currentQuestion === 0) {
-        showScreen("welcome");
-      } else {
-        currentQuestion -= 1;
-        renderQuestion();
-      }
+      if (currentQuestion === 0) showScreen("welcome");
+      else { currentQuestion -= 1; renderQuestion(); }
     });
 
     nextBtn.addEventListener("click", () => {
+      const questions = getQuestions();
       if (!answers[questions[currentQuestion].id]) return;
-
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion += 1;
-        renderQuestion();
-      } else {
-        updateProgress(questions.length + 1);
-        showScreen("contact");
-      }
+      if (currentQuestion < questions.length - 1) { currentQuestion += 1; renderQuestion(); }
+      else { updateProgress(5); showScreen("contact"); }
     });
 
     document.getElementById("contactBackBtn").addEventListener("click", () => {
-      currentQuestion = questions.length - 1;
+      currentQuestion = 3;
       renderQuestion();
-      showScreen("question");
     });
 
-    document.getElementById("contactForm").addEventListener("submit", async (event) => {
+    document.getElementById("contactForm").addEventListener("submit", async event => {
       event.preventDefault();
-
       const submitButton = event.submitter;
       const originalButtonText = submitButton ? submitButton.textContent : "";
-
       const name = document.getElementById("nameInput").value.trim();
       const phone = document.getElementById("phoneInput").value.trim();
       const consent = document.getElementById("consentInput").checked;
       const errorBox = document.getElementById("formError");
-
       errorBox.classList.remove("show");
 
       if (name.length < 3) {
@@ -882,23 +1093,19 @@
         errorBox.classList.add("show");
         return;
       }
-
-      const phoneDigits = phone.replace(/\D/g, "");
-      if (phoneDigits.length < 8) {
+      if (phone.replace(/\D/g, "").length < 8) {
         errorBox.textContent = "Ingresá un número de celular válido.";
         errorBox.classList.add("show");
         return;
       }
-
       if (!consent) {
         errorBox.textContent = "Necesitamos tu autorización para continuar.";
         errorBox.classList.add("show");
         return;
       }
 
-      const profileName = calculateProfile();
-      const profile = profiles[profileName];
-
+      savedProfileName = calculateProfile();
+      savedName = name;
       const payload = {
         timestamp: new Date().toISOString(),
         name,
@@ -907,48 +1114,54 @@
         propertyType: answers.propertyType,
         goal: answers.goal,
         timing: answers.timing,
-        profile: profileName,
+        profile: savedProfileName,
         status: "Sin contactar",
         observations: ""
       };
 
       try {
-        if (submitButton) {
-          submitButton.disabled = true;
-          submitButton.textContent = "Guardando...";
-        }
-
+        if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Guardando..."; }
         await saveLead(payload);
-
-        // Pequeña espera para asegurar que Google Forms reciba el envío.
-        await new Promise(resolve => setTimeout(resolve, 1200));
       } catch (error) {
         console.error("No se pudieron guardar los datos:", error);
         errorBox.textContent = "No pudimos guardar los datos. Revisá la conexión e intentá nuevamente.";
         errorBox.classList.add("show");
-
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = originalButtonText;
-        }
+        if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
         return;
       }
 
-      document.getElementById("resultIcon").textContent = profile.icon;
-      document.getElementById("resultTitle").textContent = profileName;
-      document.getElementById("resultText").textContent = profile.text;
+      if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
+      showScreen("challengeIntro");
+    });
 
-      const message = `Hola Leticia, participé del juego de la Expo Rural y mi perfil fue "${profileName}". Soy ${name} y quiero hacer una consulta.`;
-      const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
-      document.getElementById("whatsappBtn").href = whatsappUrl;
+    document.getElementById("challengeBackBtn").addEventListener("click", () => showScreen("contact"));
+    document.getElementById("challengeStartBtn").addEventListener("click", () => {
+      currentSuccessionQuestion = 0;
+      renderSuccessionQuestion();
+    });
 
-      progressWrap.hidden = true;
-      showScreen("result");
+    document.getElementById("successionBackBtn").addEventListener("click", () => {
+      if (currentSuccessionQuestion === 0) showScreen("challengeIntro");
+      else { currentSuccessionQuestion -= 1; renderSuccessionQuestion(); }
+    });
+
+    document.getElementById("successionNextBtn").addEventListener("click", () => {
+      if (!successionAnswers[currentSuccessionQuestion]) return;
+      if (currentSuccessionQuestion < successionQuestions.length - 1) {
+        currentSuccessionQuestion += 1;
+        renderSuccessionQuestion();
+      } else {
+        showFinalResult();
+      }
     });
 
     document.getElementById("restartBtn").addEventListener("click", () => {
       Object.keys(answers).forEach(key => delete answers[key]);
+      Object.keys(successionAnswers).forEach(key => delete successionAnswers[key]);
       currentQuestion = 0;
+      currentSuccessionQuestion = 0;
+      savedProfileName = "";
+      savedName = "";
       document.getElementById("contactForm").reset();
       showScreen("welcome");
     });
