@@ -1,15 +1,5 @@
-const FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdCEowOlyqFDiaugl68Qd7P59v6v_1lRWHdJxQJrfF39xYjLA/formResponse";
-
-const FIELDS = {
-  name: "entry.2005620554",
-  phone: "entry.892132621",
-  situation: "entry.1065046570",
-  propertyType: "entry.1166974658",
-  goal: "entry.86430257",
-  timing: "entry.1077059376",
-  profile: "entry.1731181553"
-};
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyaOkpPgHrs1t7MBVWA-7e_ivbqYQiEK8I-BnGvtmVDWLfBREKESZ3Kz9LnaM0caan5Pw/exec";
 
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
@@ -48,32 +38,32 @@ module.exports = async function handler(request, response) {
       });
     }
 
-    const formBody = new URLSearchParams();
-
-    formBody.append(FIELDS.name, String(payload.name));
-    formBody.append(FIELDS.phone, String(payload.phone));
-    formBody.append(FIELDS.situation, String(payload.situation));
-    formBody.append(FIELDS.propertyType, String(payload.propertyType));
-    formBody.append(FIELDS.goal, String(payload.goal));
-    formBody.append(FIELDS.timing, String(payload.timing));
-    formBody.append(FIELDS.profile, String(payload.profile));
-    formBody.append("fvv", "1");
-    formBody.append("pageHistory", "0");
-
-    const googleResponse = await fetch(FORM_URL, {
+    const scriptResponse = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        "Content-Type": "application/json"
       },
-      body: formBody.toString(),
+      body: JSON.stringify(payload),
       redirect: "follow"
     });
 
-    if (!googleResponse.ok) {
+    const responseText = await scriptResponse.text();
+
+    let result;
+
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      result = {
+        ok: false,
+        message: "Apps Script devolvió una respuesta no válida."
+      };
+    }
+
+    if (!scriptResponse.ok || !result.ok) {
       return response.status(502).json({
         ok: false,
-        message:
-          "Google Forms respondió con estado " + googleResponse.status
+        message: result.message || "No se pudieron guardar los datos."
       });
     }
 
@@ -82,7 +72,7 @@ module.exports = async function handler(request, response) {
       message: "Datos guardados correctamente."
     });
   } catch (error) {
-    console.error("Error al enviar a Google Forms:", error);
+    console.error("Error al enviar a Apps Script:", error);
 
     return response.status(500).json({
       ok: false,
