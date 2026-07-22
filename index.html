@@ -670,7 +670,7 @@
         <h2>¿Cuánto sabés sobre propiedades heredadas?</h2>
         <div class="challenge-copy">
           <strong>Dos preguntas sobre situaciones muy comunes.</strong>
-          Antes de mostrarte tu resultado final, te proponemos un desafío rápido.
+          Ahora te proponemos un desafío rápido sobre sucesiones.
           ¿Te animás?
         </div>
         <div class="actions">
@@ -690,41 +690,46 @@
         </div>
       </section>
 
-      <section class="screen" data-screen="result">
+      <section class="screen" data-screen="profileResult">
         <div class="result-icon" id="resultIcon" aria-hidden="true">🏡</div>
         <div class="eyebrow">Tu perfil es</div>
         <h2 id="resultTitle"></h2>
         <div class="result-box" id="resultText"></div>
 
-        <div class="challenge-copy" style="margin-top:20px;">
-          <strong id="successionResultTitle"></strong>
-          <span id="successionResultText"></span>
+        <div class="contact-card" style="margin-top:20px;">
+          <p><strong>¿Querés conversar sobre tu propiedad o búsqueda?</strong></p>
+          <a class="btn whatsapp" id="whatsappBtn" target="_blank" rel="noopener noreferrer">
+            Hablar con Leticia
+          </a>
         </div>
 
-        <div class="contact-choice">
-          <div class="contact-card">
-            <p><strong>¿Tu consulta es sobre una propiedad?</strong></p>
-            <a class="btn whatsapp" id="whatsappBtn" target="_blank" rel="noopener noreferrer">
-              Hablar con Leticia
-            </a>
-          </div>
-
-          <div class="contact-card">
-            <p><strong>¿Tu consulta está relacionada con una sucesión?</strong></p>
-            <a class="btn legal-whatsapp" id="juanWhatsappBtn" target="_blank" rel="noopener noreferrer">
-              Hablar con Juan
-            </a>
-          </div>
+        <div class="actions" style="margin-top:20px;">
+          <button class="btn btn-primary" id="goToChallengeBtn">
+            Continuar con el desafío
+          </button>
         </div>
-
-        <button class="btn btn-secondary" id="restartBtn" style="margin-top:16px;">
-          Volver a jugar
-        </button>
 
         <div class="signature">
           <strong>Leticia Gómez Propiedades</strong><br />
           Hacemos simple lo importante
         </div>
+      </section>
+
+      <section class="screen" data-screen="successionResult">
+        <div class="eyebrow">Resultado del desafío</div>
+        <h2 id="successionResultTitle"></h2>
+        <div class="result-box" id="successionResultText"></div>
+
+        <div class="contact-card" style="margin-top:20px;">
+          <p><strong>¿Tu consulta está relacionada con una sucesión?</strong></p>
+          <a class="btn legal-whatsapp" id="juanWhatsappBtn" target="_blank" rel="noopener noreferrer">
+            Hablar con Juan
+          </a>
+        </div>
+
+        <button class="btn btn-secondary" id="restartBtn" style="margin-top:16px;">
+          Volver a jugar
+        </button>
       </section>
     </section>
   </main>
@@ -1021,10 +1026,29 @@
       showScreen("successionQuestion");
     }
 
-    function showFinalResult() {
+    function showProfileResult() {
       const profile = profiles[savedProfileName];
-      const score = successionQuestions.reduce((total, question, index) =>
-        total + (successionAnswers[index] === question.correct ? 1 : 0), 0);
+
+      document.getElementById("resultIcon").textContent = profile.icon;
+      document.getElementById("resultTitle").textContent = savedProfileName;
+      document.getElementById("resultText").textContent = profile.text;
+
+      const leticiaMessage =
+        `Hola Leticia, participé del juego de la Expo Rural y mi perfil fue "${savedProfileName}". Soy ${savedName} y quiero hacer una consulta.`;
+
+      document.getElementById("whatsappBtn").href =
+        `https://wa.me/${CONFIG.leticiaWhatsappNumber}?text=${encodeURIComponent(leticiaMessage)}`;
+
+      progressWrap.hidden = true;
+      showScreen("profileResult");
+    }
+
+    function showFinalResult() {
+      const score = successionQuestions.reduce(
+        (total, question, index) =>
+          total + (successionAnswers[index] === question.correct ? 1 : 0),
+        0
+      );
 
       const challengeResults = {
         2: {
@@ -1041,19 +1065,19 @@
         }
       };
 
-      document.getElementById("resultIcon").textContent = profile.icon;
-      document.getElementById("resultTitle").textContent = savedProfileName;
-      document.getElementById("resultText").textContent = profile.text;
-      document.getElementById("successionResultTitle").textContent = challengeResults[score].title;
-      document.getElementById("successionResultText").textContent = challengeResults[score].text;
+      document.getElementById("successionResultTitle").textContent =
+        challengeResults[score].title;
+      document.getElementById("successionResultText").textContent =
+        challengeResults[score].text;
 
-      const leticiaMessage = `Hola Leticia, participé del juego de la Expo Rural y mi perfil fue "${savedProfileName}". Soy ${savedName} y quiero hacer una consulta.`;
-      const juanMessage = `Hola, Juan. Participé del juego en la Exposición Rural y quisiera hacerte una consulta sobre una propiedad en sucesión.`;
-      document.getElementById("whatsappBtn").href = `https://wa.me/${CONFIG.leticiaWhatsappNumber}?text=${encodeURIComponent(leticiaMessage)}`;
-      document.getElementById("juanWhatsappBtn").href = `https://wa.me/${CONFIG.juanWhatsappNumber}?text=${encodeURIComponent(juanMessage)}`;
+      const juanMessage =
+        "Hola, Juan. Participé del juego en la Exposición Rural y quisiera hacerte una consulta sobre una propiedad en sucesión.";
+
+      document.getElementById("juanWhatsappBtn").href =
+        `https://wa.me/${CONFIG.juanWhatsappNumber}?text=${encodeURIComponent(juanMessage)}`;
 
       progressWrap.hidden = true;
-      showScreen("result");
+      showScreen("successionResult");
     }
 
     document.getElementById("startBtn").addEventListener("click", () => {
@@ -1131,10 +1155,11 @@
       }
 
       if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalButtonText; }
-      showScreen("challengeIntro");
+      showProfileResult();
     });
 
-    document.getElementById("challengeBackBtn").addEventListener("click", () => showScreen("contact"));
+    document.getElementById("goToChallengeBtn").addEventListener("click", () => showScreen("challengeIntro"));
+    document.getElementById("challengeBackBtn").addEventListener("click", () => showScreen("profileResult"));
     document.getElementById("challengeStartBtn").addEventListener("click", () => {
       currentSuccessionQuestion = 0;
       renderSuccessionQuestion();
