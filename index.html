@@ -644,17 +644,7 @@
 
   <script>
     const CONFIG = {
-      whatsappNumber: "5492346636360",
-      googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdCEowOlyqFDiaugl68Qd7P59v6v_1lRWHdJxQJrfF39xYjLA/formResponse",
-      googleFormFields: {
-        name: "entry.2005620554",
-        phone: "entry.892132621",
-        situation: "entry.1065046570",
-        propertyType: "entry.1166974658",
-        goal: "entry.86430257",
-        timing: "entry.1077059376",
-        profile: "entry.1731181553"
-      }
+      whatsappNumber: "5492346636360"
     };
 
     const questions = [
@@ -824,31 +814,21 @@
     }
 
     async function saveLead(payload) {
-      const fields = CONFIG.googleFormFields;
-      const body = new URLSearchParams();
-
-      body.append(fields.name, payload.name);
-      body.append(fields.phone, payload.phone);
-      body.append(fields.situation, payload.situation);
-      body.append(fields.propertyType, payload.propertyType);
-      body.append(fields.goal, payload.goal);
-      body.append(fields.timing, payload.timing);
-      body.append(fields.profile, payload.profile);
-
-      body.append("fvv", "1");
-      body.append("pageHistory", "0");
-
-      await fetch(CONFIG.googleFormUrl, {
+      const response = await fetch("/api/submit", {
         method: "POST",
-        mode: "no-cors",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          "Content-Type": "application/json"
         },
-        body: body.toString(),
-        keepalive: true
+        body: JSON.stringify(payload)
       });
 
-      return { ok: true };
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || "No se pudieron guardar los datos.");
+      }
+
+      return result;
     }
 
     document.getElementById("startBtn").addEventListener("click", () => {
